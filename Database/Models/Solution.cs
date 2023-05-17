@@ -8,13 +8,15 @@ public class Solution
 
     public int UserId { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public string CreatedAt { get; set; } = null!;
 
-    public string? Html { get; set; }
+    public string Html { get; set; } = null!;
 
-    public string? Css { get; set; }
+    public string Css { get; set; } = null!;
 
-    public string? Js { get; set; }
+    public string Js { get; set; } = null!;
+    
+    public bool Completed { get; set; }
 
     public virtual User User { get; set; } = null!;
 

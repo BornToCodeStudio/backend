@@ -5,11 +5,6 @@ namespace borntocode_backend.Database;
 
 public sealed class ApplicationContext : DbContext
 {
-    public ApplicationContext()
-    {
-        Database.EnsureCreated();
-    }
-    
     public DbSet<Solution> Solutions { get; set; } = null!;
 
     public DbSet<SolutionComment> SolutionComments { get; set; } = null!;
@@ -24,8 +19,10 @@ public sealed class ApplicationContext : DbContext
 
     public DbSet<User> Users { get; set; } = null!;
 
+    public DbSet<Role> Roles { get; set; } = null!;
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=root;");
+        optionsBuilder.UseNpgsql("Host=45.132.18.239;Port=5432;Database=postgres;Username=postgres;Password=root;");
     }
 }

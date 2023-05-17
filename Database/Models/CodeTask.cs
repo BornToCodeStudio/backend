@@ -8,13 +8,15 @@ public class CodeTask
 
     public int AuthorId { get; set; }
 
-    public string? ShortDescription { get; set; } = null!;
+    public string? ShortDescription { get; set; }
 
     public string? FullDescription { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public string? CodeExample { get; set; }
+
+    public string Struct { get; set; } = null!;
 
     public virtual User Author { get; set; } = null!;
 

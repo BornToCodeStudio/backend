@@ -16,6 +16,14 @@ public class CodeTask
 
     public string? CodeExample { get; set; }
 
+    public List<bool>? Languages { get; set; }
+
+    public double CreationDate { get; set; }
+    
+    public int Likes { get; set; }
+    
+    public int Views { get; set; }
+    
     public string Struct { get; set; } = null!;
 
     public virtual User Author { get; set; } = null!;

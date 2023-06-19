@@ -46,7 +46,7 @@ builder.Services.AddAuthentication(options =>
         
     options.Configuration = new OpenIdConnectConfiguration();
     options.Authority = Environment.GetEnvironmentVariable("JWT_ISSUER");
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = true;
     options.SaveToken = true;
 
     options.Events = new JwtBearerEvents
@@ -97,8 +97,27 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-builder.WebHost.UseUrls("http://api.born-to-code.ru");
-//builder.WebHost.UseUrls("http://localhost:5000");
+builder.WebHost.UseIISIntegration();
+
+// builder.WebHost.UseKestrel(options =>
+// {
+//     options.ListenAnyIP(443, listenOptions =>
+//     {
+//         listenOptions.UseHttps("cert.pfx", "btc");
+//     });
+// });
+
+// "Kestrel": {
+//     "Endpoints": {
+//         "Https": {
+//             "Url": "https://api.born-to-code.ru:443",
+//             "Certificate": {
+//                 "Path": "cert.pfx",
+//                 "Password": "btc"
+//             }
+//         }
+//     }
+// }
 
 var app = builder.Build();
 
@@ -109,7 +128,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

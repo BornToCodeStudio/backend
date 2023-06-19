@@ -6,5 +6,7 @@ public class UserDto
 
     public string Name { get; set; } = null!;
 
-    public string Description { get; set; } = null!;
+    public string Country { get; set; } = null!;
+
+    public string CreatedAt { get; set; } = null!;
 }

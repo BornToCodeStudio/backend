@@ -23,6 +23,6 @@ public sealed class ApplicationContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Host=45.132.18.239;Port=5432;Database=postgres;Username=postgres;Password=root;");
+        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=root;");
     }
 }

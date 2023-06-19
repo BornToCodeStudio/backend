@@ -1,4 +1,5 @@
 using borntocode_backend.Database;
+using borntocode_backend.Database.Models;
 using borntocode_backend.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,21 +18,26 @@ public class TasksController : Controller
         await using var context = new ApplicationContext();
 
         return await context.Tasks
+            .AsNoTracking()
             .Include(t => t.Author)
             .Select(t => new TaskDto
             {
                 Id = t.Id,
                 Title = t.Title,
                 Author = t.Author.Name,
+                AuthorId = t.AuthorId,
                 ShortDescription = t.ShortDescription!,
                 FullDescription = t.FullDescription!,
                 CodeExample = t.CodeExample!,
+                CreationDate = t.CreationDate,
+                Languages = t.Languages ?? new List<bool> {false, false, false},
+                Likes = t.Likes,
+                Views = t.Views,
                 HtmlStruct = JsonConvert.DeserializeObject<TaskHtmlStructDto>(t.Struct)!
             })
             .ToListAsync();
     }
-
-    [Authorize]
+    
     [HttpGet("get/{id:int}")]
     public async Task<ActionResult<TaskDto>> GetTask(int id)
     {
@@ -54,14 +60,14 @@ public class TasksController : Controller
             HtmlStruct = JsonConvert.DeserializeObject<TaskHtmlStructDto>(task.Struct)!
         };
     }
-
-    [Authorize]
+    
     [HttpGet("get/user/{name}")]
     public async Task<ActionResult<List<TaskDto>>> GetUserTasks(string name)
     {
         await using var context = new ApplicationContext();
 
         var user = await context.Users
+            .AsNoTracking()
             .Include(u => u.Tasks)
             .FirstOrDefaultAsync(u => u.Name == name);
         if (user == null)
@@ -72,8 +78,60 @@ public class TasksController : Controller
             Id = t.Id,
             Title = t.Title,
             Author = t.Author.Name,
+            AuthorId = t.AuthorId,
             ShortDescription = t.ShortDescription!,
             FullDescription = t.FullDescription!,
+            CodeExample = t.CodeExample!,
+            CreationDate = t.CreationDate,
+            Languages = t.Languages ?? new List<bool> {false, false, false},
+            Likes = t.Likes,
+            Views = t.Views,
+            HtmlStruct = JsonConvert.DeserializeObject<TaskHtmlStructDto>(t.Struct)!
+        }).ToList();
+    }
+    
+    [HttpGet("get/completed/user/{name}")]
+    public async Task<ActionResult<List<TaskDto>>> GetUserCompletedTasks(string name)
+    {
+        await using var context = new ApplicationContext();
+
+        var user = await context.Users
+            .AsNoTracking()
+            .Include(u => u.Solutions)
+            .FirstOrDefaultAsync(u => u.Name == name);
+        if (user == null)
+            return NotFound();
+
+        var tasks = new List<CodeTask>();
+        foreach (var solution in user.Solutions.Where(s => s.Completed))
+        {
+            var task = await context.Tasks
+                .AsNoTracking()
+                .Include(t => t.Author)
+                .FirstOrDefaultAsync(t => t.Id == solution.TaskId);
+            if (task == null)
+                continue;
+            
+            tasks.Add(task);
+        }
+
+        if (tasks.Count == 0)
+            return new List<TaskDto>();
+        
+        return tasks.Select(t => new TaskDto
+        {
+            Id = t.Id,
+            Title = t.Title,
+            Author = t.Author.Name,
+            AuthorId = t.AuthorId,
+            ShortDescription = t.ShortDescription!,
+            FullDescription = t.FullDescription!,
+            CodeExample = t.CodeExample!,
+            CreationDate = t.CreationDate,
+            Languages = t.Languages ?? new List<bool> {false, false, false},
+            Likes = t.Likes,
+            Views = t.Views,
+            HtmlStruct = JsonConvert.DeserializeObject<TaskHtmlStructDto>(t.Struct)!
         }).ToList();
     }
 }

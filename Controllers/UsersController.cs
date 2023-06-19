@@ -44,14 +44,17 @@ public class UsersController : Controller
 
         var cookieOptions = new CookieOptions
         {
-            Expires = DateTime.Now.AddMinutes(30)
+            Expires = DateTime.Now.AddMinutes(30),
+            Domain = "born-to-code.ru",
+            HttpOnly = true,
+            Secure = true
         };
         
         HttpContext.Response.Cookies.Append("TOKEN", token, cookieOptions);
 
         return Ok();
     }
-
+    
     [HttpPost("signUp")]
     public async Task<ActionResult> SignUp([FromBody] SignUpDto signUpDto)
     {
@@ -72,7 +75,8 @@ public class UsersController : Controller
             Password = password,
             Email = "",
             CreatedAt = DateTime.UtcNow,
-            RoleId = role.Id
+            RoleId = role.Id,
+            Country = signUpDto.Country
         };
 
         await context.Users.AddAsync(user);
@@ -85,10 +89,41 @@ public class UsersController : Controller
     }
     
     [Authorize]
-    [HttpPost("verifySignIn")]
-    public ActionResult VerifySignIn()
+    [HttpGet("signOut")]
+    public new ActionResult SignOut()
     {
+        var cookieOptions = new CookieOptions
+        {
+            Expires = DateTime.Now.AddMinutes(30),
+            Domain = "born-to-code.ru",
+            HttpOnly = true,
+            Secure = true
+        };
+        
+        HttpContext.Response.Cookies.Delete("TOKEN", cookieOptions);
+        
         return Ok();
+    }
+    
+    [Authorize]
+    [HttpGet("authenticate")]
+    public async Task<ActionResult<UserDto>> VerifySignIn()
+    {
+        var name = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(name))
+            return BadRequest();
+
+        await using var context = new ApplicationContext();
+
+        var user = context.Users.FirstOrDefault(u => u.Name == name);
+        if (user == null)
+            return NotFound();
+
+        return new UserDto
+        {
+            Id = user.Id,
+            Name = user.Name
+        };
     }
 
     [Authorize]
@@ -119,7 +154,10 @@ public class UsersController : Controller
 
         return new UserDto
         {
-            Name = user.Name
+            Id = user.Id,
+            Name = user.Name,
+            Country = user.Country,
+            CreatedAt = user.CreatedAt.ToShortDateString()
         };
     }
     
@@ -160,7 +198,7 @@ public class UsersController : Controller
             return NotFound();
 
         if (user.Avatar == null)
-            return NotFound();
+            return "";
 
         var base64 = Convert.ToBase64String(user.Avatar);
         var bytes = Convert.FromBase64String(base64);

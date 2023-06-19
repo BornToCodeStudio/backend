@@ -17,6 +17,8 @@ public class User
     public DateTime LastLoginAt { get; set; }
 
     public byte[]? Avatar { get; set; }
+
+    public string Country { get; set; } = null!;
     
     public virtual Role Role { get; set; } = null!;
 
